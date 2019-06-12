@@ -35,3 +35,11 @@ Checar status de uma máquina virtual
 ```
 vagrant status
 ```
+Reiniciar uma máquina virtual
+```
+vagrant reload
+```
+Desturir uma máquina virtual (Arquivos da máquina virtual ficam salvos no computador quando executar o vagrant up)
+```
+vagrant reload
+```
