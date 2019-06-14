@@ -36,8 +36,17 @@ Vagrant.configure("2") do |config|
     config.vm.define "phpweb" do |phpweb|
     
         #Configuração de Rede
-        phpweb.vm.network "forwarded_port", guest: 80, host: 8089
-        phpweb.vm.network "private_network", type: "dhcp"
+        phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
+        phpweb.vm.network "private_network", ip: "172.28.128.9"
+
+        #Instalando Puppet
+        phpweb.vm.provision "shell",
+            inline: "apt-get update && apt-get install -y puppet"
+
+        phpweb.vm.provision "puppet" do |puppet|
+            puppet.manifests_path = "./configs/manifests"
+            puppet.manifest_file = "phpweb.pp"
+        end
 
     end
 
