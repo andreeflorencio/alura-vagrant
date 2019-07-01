@@ -8,7 +8,7 @@ SCRIPT
 Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/bionic64"
 
-    #Maquina Virtual 1 - MySQL
+    #Maquina Virtual 1 - MySQL + shell
     config.vm.define "mysqldb" do |mysql|
     
         #Configuração de Rede
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
     end 
 
-    #Maquina Virtual 2 - PHP
+    #Maquina Virtual 2 - PHP + puppet
     config.vm.define "phpweb" do |phpweb|
     
         #Configuração de Rede
@@ -49,5 +49,30 @@ Vagrant.configure("2") do |config|
         end
 
     end
+
+    #Maquina Virtual 3 - MySQL
+    config.vm.define "mysqlserver" do |mysqlserver|
+       
+        #Configuração de Rede
+        mysqlserver.vm.network "private_network", type: "dhcp"
+
+    end
+
+    #Maquina Virtual 3 - Ansible
+    config.vm.define "ansible" do |ansible|
+       
+        #Configuração de Rede
+        ansible.vm.network "private_network", type: "dhcp"
+
+        # Scripts Shell
+        ansible.vm.provision "shell", 
+            inline: "apt-get update && \
+            apt-get install -y software-properties-common && \
+            apt-add-repository --yes --update && \
+            apt-get install -y ansible"
+
+    end
+    
+
 
 end
