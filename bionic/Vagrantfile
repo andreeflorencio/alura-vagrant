@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
     end 
 
-    #Maquina Virtual 2 - PHP + puppet
+    # Máquina Virtual 2 - PHP + puppet
     config.vm.define "phpweb" do |phpweb|
     
         #Configuração de Rede
@@ -50,29 +50,39 @@ Vagrant.configure("2") do |config|
 
     end
 
-    #Maquina Virtual 3 - MySQL
+    # Máquina Virtual 3 - MySQL
     config.vm.define "mysqlserver" do |mysqlserver|
        
-        #Configuração de Rede
+        # Configuração de Rede
         mysqlserver.vm.network "private_network", type: "dhcp"
+
+        # Scripts Shell
+        # Script para copiar chave publica do hosto para a maquina virtual
+        mysqlserver.vm.provision "shell", 
+        inline: "cat /vagrant/configs/id_rsa.pub >> .ssh/authorized_keys"
 
     end
 
-    #Maquina Virtual 3 - Ansible
+    # Máquina Virtual 4 - Ansible
+    # Esta máquina vai configurar a Maquina Virtual 3 - MySQL
     config.vm.define "ansible" do |ansible|
        
         #Configuração de Rede
         ansible.vm.network "private_network", type: "dhcp"
 
         # Scripts Shell
+        # Script para copiar chave privada do host para a maquina virtual
+        ansible.vm.provision "shell", 
+        inline: "cp /vagrant/id_rsa /home/vagrant && \
+                chmod 600 /home/vagrant/id_rsa"
+
+        # Scripts Shell
         ansible.vm.provision "shell", 
             inline: "apt-get update && \
             apt-get install -y software-properties-common && \
-            apt-add-repository --yes --update && \
+            apt-add-repository --yes --update ppa:ansible/ansible && \
             apt-get install -y ansible"
 
     end
     
-
-
 end
