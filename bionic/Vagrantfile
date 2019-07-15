@@ -8,51 +8,57 @@ SCRIPT
 Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/bionic64"
 
-    #Maquina Virtual 1 - MySQL + shell
-    config.vm.define "mysqldb" do |mysql|
+    # #Maquina Virtual 1 - MySQL + shell
+    # config.vm.define "mysqldb" do |mysql|
     
-        #Configuração de Rede
-        mysql.vm.network "private_network", type: "dhcp"
+    #     #Configuração de Rede
+    #     mysql.vm.network "private_network", type: "dhcp"
         
-        # Scripts Shell
-        mysql.vm.provision "shell", 
-            inline: "cat /configs/id_rsa.pub >> .ssh/authorized_keys"
+    #     # Scripts Shell
+    #     mysql.vm.provision "shell", 
+    #         inline: "cat /configs/id_rsa.pub >> .ssh/authorized_keys"
         
-            mysql.vm.provision "shell", inline: $script_mysql
+    #         mysql.vm.provision "shell", inline: $script_mysql
     
-            mysql.vm.provision "shell", 
-            inline: "cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf"
+    #         mysql.vm.provision "shell", 
+    #         inline: "cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf"
     
-            mysql.vm.provision "shell", 
-            inline: "service mysql restart"
+    #         mysql.vm.provision "shell", 
+    #         inline: "service mysql restart"
     
-        #Pastas Comartilhadas
-        mysql.vm.synced_folder "./configs", "/configs"
-        mysql.vm.synced_folder ".", "/vagrant", disabled: true
+    #     #Pastas Comartilhadas
+    #     mysql.vm.synced_folder "./configs", "/configs"
+    #     mysql.vm.synced_folder ".", "/vagrant", disabled: true
 
-    end 
+    # end 
 
     # Máquina Virtual 2 - PHP + puppet
-    config.vm.define "phpweb" do |phpweb|
+    # config.vm.define "phpweb" do |phpweb|
     
-        #Configuração de Rede
-        phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
-        phpweb.vm.network "private_network", ip: "172.28.128.9"
+    #     #Configuração de Rede
+    #     phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
+    #     phpweb.vm.network "private_network", ip: "172.28.128.9"
 
-        #Instalando Puppet
-        phpweb.vm.provision "shell",
-            inline: "apt-get update && apt-get install -y puppet"
+    #     #Instalando Puppet
+    #     phpweb.vm.provision "shell",
+    #         inline: "apt-get update && apt-get install -y puppet"
 
-        phpweb.vm.provision "puppet" do |puppet|
-            puppet.manifests_path = "./configs/manifests"
-            puppet.manifest_file = "phpweb.pp"
-        end
+    #     phpweb.vm.provision "puppet" do |puppet|
+    #         puppet.manifests_path = "./configs/manifests"
+    #         puppet.manifest_file = "phpweb.pp"
+    #     end
 
-    end
+    # end
 
     # Máquina Virtual 3 - MySQL
     config.vm.define "mysqlserver" do |mysqlserver|
-       
+        
+        mysqlserver.vm.provider "virtualbox" do |vb|
+            vb.memory = 512
+            vb.cpus = 2
+            vb.name = "ubuntu_bionic_mysql"
+        end
+
         # Configuração de Rede
         mysqlserver.vm.network "private_network", type: "dhcp"
 
@@ -82,6 +88,11 @@ Vagrant.configure("2") do |config|
             apt-get install -y software-properties-common && \
             apt-add-repository --yes --update ppa:ansible/ansible && \
             apt-get install -y ansible"
+
+
+        ansible.vm.provision "shell", 
+            inline: "ansible-playbook -i /vagrant/configs/ansible/hosts \
+                    /vagrant/configs/ansible/playbook.yml"
 
     end
     
